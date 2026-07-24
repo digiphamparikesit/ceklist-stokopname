@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ceklist Stok Opname Obat — RSUD AM Parikesit</title>
+<style>
+  :root{
+    --sage-950:#1e2a1f;
+    --sage-900:#2c3b2c;
+    --sage-800:#3d4f3d;
+    --sage-700:#556b55;
+    --sage-600:#6f8a6d;
+    --sage-500:#8ba888;
+    --sage-400:#a9c2a3;
+    --sage-300:#c4d8bd;
+    --sage-200:#dde9d6;
+    --sage-100:#eef3e8;
+    --sage-50:#f5f8f1;
+    --cream:#faf9f4;
+    --clay:#b5673f;
+    --clay-dark:#8f4f30;
+    --ink:#293428;
+    --done:#4f7a52;
+    --today-ring:#c98a3c;
+    --font-display:'Cormorant Garamond', 'Georgia', serif;
+    --font-body:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono:'JetBrains Mono', 'Courier New', monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: linear-gradient(180deg, var(--sage-100) 0%, var(--sage-50) 260px, var(--cream) 260px);
+    font-family: var(--font-body);
+    color: var(--ink);
+    min-height:100vh;
+    padding: 28px 20px 60px;
+  }
+
+  .wrap{max-width:1320px;margin:0 auto;}
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:24px;
+    flex-wrap:wrap;
+    padding-bottom:22px;
+    border-bottom: 1px solid var(--sage-300);
+    margin-bottom:22px;
+  }
+  .brand-eyebrow{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--sage-700);
+    margin:0 0 6px;
+  }
+  h1{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:40px;
+    line-height:1.05;
+    margin:0;
+    color:var(--sage-950);
+    letter-spacing:-.01em;
+  }
+  h1 em{font-style:italic;color:var(--clay);font-weight:600;}
+  .subtitle{
+    font-size:13.5px;
+    color:var(--sage-700);
+    margin-top:8px;
+    max-width:560px;
+  }
+
+  .controls{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .field label{
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--sage-700);
+  }
+  select, input[type="text"]{
+    font-family:var(--font-body);
+    font-size:14px;
+    padding:9px 14px;
+    border-radius:8px;
+    border:1px solid var(--sage-400);
+    background:#fff;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  select:focus, input[type="text"]:focus{
+    border-color:var(--sage-700);
+    box-shadow:0 0 0 3px var(--sage-200);
+  }
+  select{min-width:110px; cursor:pointer;}
+  input[type="text"]{min-width:220px;}
+
+  /* ---------- Stat strip ---------- */
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--sage-300);
+    border:1px solid var(--sage-300);
+    border-radius:12px;
+    overflow:hidden;
+    margin-bottom:22px;
+  }
+  .stat{
+    background:var(--sage-50);
+    padding:16px 20px;
+  }
+  .stat .num{
+    font-family:var(--font-display);
+    font-size:30px;
+    font-weight:600;
+    color:var(--sage-900);
+    line-height:1;
+  }
+  .stat .label{
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--sage-700);
+    margin-top:6px;
+  }
+  .stat.accent .num{color:var(--clay);}
+
+  /* ---------- Table ---------- */
+  .table-shell{
+    background:#fff;
+    border:1px solid var(--sage-300);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 1px 2px rgba(41,52,40,.04), 0 8px 24px -12px rgba(41,52,40,.12);
+  }
+  .table-scroll{
+    overflow-x:auto;
+  }
+  table{
+    border-collapse:collapse;
+    width:100%;
+    min-width:1220px;
+  }
+  thead th{
+    position:sticky;
+    top:0;
+    background:var(--sage-900);
+    color:var(--sage-100);
+    z-index:3;
+    font-weight:600;
+  }
+  th, td{
+    padding:0;
+    border-bottom:1px solid var(--sage-200);
+    border-right:1px solid var(--sage-200);
+  }
+  th:last-child, td:last-child{border-right:none;}
+
+  .th-room{
+    text-align:left;
+    padding:12px 16px !important;
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    position:sticky;
+    left:0;
+    z-index:4;
+    background:var(--sage-900);
+    min-width:280px;
+    max-width:280px;
+  }
+  .th-month{
+    text-align:center;
+    padding:10px 4px !important;
+    font-family:var(--font-mono);
+    font-size:10.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    width:74px;
+  }
+  .th-month .mon-full{
+    display:block;
+    font-family:var(--font-display);
+    font-size:14px;
+    text-transform:none;
+    letter-spacing:0;
+    margin-top:2px;
+    font-weight:600;
+  }
+  .th-month.current-month{
+    background:var(--sage-700);
+  }
+
+  tbody tr:nth-child(even) td{background:var(--sage-50);}
+  tbody tr:hover td{background:var(--sage-200) !important;}
+
+  td.td-room{
+    text-align:left;
+    padding:10px 16px;
+    font-size:13px;
+    font-weight:600;
+    color:var(--sage-950);
+    position:sticky;
+    left:0;
+    background:inherit;
+    background-color:#fff;
+    z-index:2;
+    border-right:1px solid var(--sage-300);
+  }
+  tbody tr:nth-child(even) td.td-room{background-color:var(--sage-50);}
+  tbody tr:hover td.td-room{background-color:var(--sage-200) !important;}
+
+  .room-idx{
+    display:inline-block;
+    font-family:var(--font-mono);
+    font-size:10px;
+    color:var(--sage-500);
+    width:22px;
+  }
+
+  td.td-cell{
+    text-align:center;
+    vertical-align:middle;
+    padding:6px 2px;
+  }
+
+  .cell-btn{
+    width:100%;
+    height:52px;
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    border-radius:8px;
+    transition:background .12s ease;
+  }
+  .cell-btn:hover{background:var(--sage-300);}
+  .cell-btn:focus-visible{outline:2px solid var(--clay); outline-offset:-2px;}
+
+  .checkbox-face{
+    width:20px;
+    height:20px;
+    border-radius:6px;
+    border:1.5px solid var(--sage-500);
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:all .15s ease;
+  }
+  .cell-btn.checked .checkbox-face{
+    background:var(--done);
+    border-color:var(--done);
+  }
+  .checkbox-face svg{
+    width:13px;height:13px;
+    opacity:0;
+    transform:scale(.6);
+    transition:all .15s ease;
+  }
+  .cell-btn.checked .checkbox-face svg{opacity:1;transform:scale(1);}
+
+  .cell-date{
+    font-family:var(--font-mono);
+    font-size:8.5px;
+    color:var(--sage-600);
+    min-height:11px;
+    letter-spacing:.02em;
+  }
+  .cell-btn.checked .cell-date{color:var(--done);font-weight:600;}
+
+  td.is-future .cell-btn{opacity:.35; cursor:not-allowed;}
+  td.is-future .checkbox-face{border-style:dashed;}
+
+  .row-progress{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:0 16px 8px;
+    margin-top:-2px;
+  }
+  .row-progress-bar{
+    flex:1;
+    height:3px;
+    background:var(--sage-200);
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .row-progress-fill{
+    height:100%;
+    background:var(--sage-600);
+    border-radius:2px;
+    transition:width .2s ease;
+  }
+  .row-progress-txt{
+    font-family:var(--font-mono);
+    font-size:9px;
+    color:var(--sage-600);
+    min-width:26px;
+    text-align:right;
+  }
+
+  /* ---------- Footer / signature ---------- */
+  .footnote{
+    margin-top:18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    font-size:11.5px;
+    color:var(--sage-700);
+  }
+  .legend{
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  .legend-item{display:flex;align-items:center;gap:6px;}
+  .legend-swatch{width:12px;height:12px;border-radius:4px;border:1.5px solid var(--sage-500);}
+  .legend-swatch.done{background:var(--done);border-color:var(--done);}
+  .legend-swatch.future{border-style:dashed;opacity:.6;}
+
+  .save-toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--sage-950);
+    color:var(--sage-100);
+    padding:10px 20px;
+    border-radius:100px;
+    font-size:12.5px;
+    font-family:var(--font-mono);
+    letter-spacing:.03em;
+    opacity:0;
+    pointer-events:none;
+    transition:all .25s ease;
+    z-index:50;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);
+  }
+  .save-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .no-results{
+    padding:40px;
+    text-align:center;
+    color:var(--sage-600);
+    font-family:var(--font-mono);
+    font-size:12px;
+  }
+
+  ::-webkit-scrollbar{height:10px;width:10px;}
+  ::-webkit-scrollbar-track{background:var(--sage-100);}
+  ::-webkit-scrollbar-thumb{background:var(--sage-400);border-radius:6px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--sage-500);}
+
+  @media (max-width:720px){
+    h1{font-size:28px;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div>
+      <p class="brand-eyebrow">RSUD AM Parikesit &middot; Instalasi Farmasi</p>
+      <h1>Ceklist <em>Stok Opname</em> Obat</h1>
+      <p class="subtitle">Pemantauan pelaksanaan stok opname bulanan di seluruh gudang &amp; unit farmasi. Klik kotak untuk menandai selesai — tanggal tersimpan otomatis.</p>
+    </div>
+    <div class="controls">
+      <div class="field">
+        <label for="yearSelect">Tahun</label>
+        <select id="yearSelect"></select>
+      </div>
+      <div class="field">
+        <label for="searchInput">Cari Unit / Gudang</label>
+        <input type="text" id="searchInput" placeholder="mis. IGD, poliklinik...">
+      </div>
+    </div>
+  </header>
+
+  <div class="stats" id="statsRow">
+    <div class="stat">
+      <div class="num" id="statTotalUnits">0</div>
+      <div class="label">Total Gudang / Unit</div>
+    </div>
+    <div class="stat accent">
+      <div class="num" id="statCompleted">0</div>
+      <div class="label">Sudah Opname (Tahun Ini)</div>
+    </div>
+    <div class="stat">
+      <div class="num" id="statPercent">0%</div>
+      <div class="label">Kelengkapan Tahunan</div>
+    </div>
+    <div class="stat">
+      <div class="num" id="statMonth">0%</div>
+      <div class="label">Kelengkapan Bulan Ini</div>
+    </div>
+  </div>
+
+  <div class="table-shell">
+    <div class="table-scroll">
+      <table id="mainTable">
+        <thead>
+          <tr id="headerRow">
+            <th class="th-room">Gudang / Unit</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="no-results" id="noResults" style="display:none;">Tidak ada unit yang cocok dengan pencarian.</div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch done"></span> Sudah opname</div>
+      <div class="legend-item"><span class="legend-swatch"></span> Belum opname</div>
+      <div class="legend-item"><span class="legend-swatch future"></span> Bulan mendatang (terkunci)</div>
+    </div>
+    <div>Data tersimpan otomatis &amp; dapat dilihat bersama seluruh pengguna tautan ini.</div>
+  </div>
+
+</div>
+
+<div class="save-toast" id="saveToast">tersimpan</div>
+
+<script>
+const ROOMS = [
+"ADMISI INSTALASI GAWAT DARURAT","ADMISI RAWAT INAP","ADMISI RAWAT JALAN","BDRS","CSSD",
+"DEPO FARMASI CATHLAB","DEPO FARMASI CENDRAWASIH","DEPO FARMASI IBS","DEPO FARMASI IGD",
+"DEPO FARMASI RAWAT INAP","DEPO FARMASI TERPADU","GENERAL CHECK UP","GUDANG FARMASI","IPS RS",
+"KAMAR JENAZAH","KESEHATAN LINGKUNGAN","LAB PA","LAB PK","LAUNDRY","MIKROBIOLOGI","ONE DAY CARE",
+"POLIKLINIK ANAK","POLIKLINIK BEDAH ANAK","POLIKLINIK BEDAH UMUM","POLIKLINIK CATHLAB",
+"POLIKLINIK GIGI & MULUT","POLIKLINIK JANTUNG","POLIKLINIK KANDUNGAN","POLIKLINIK KEBIDANAN",
+"POLIKLINIK MATA","POLIKLINIK ONKOLOGI","POLIKLINIK PARU","POLIKLINIK PENYAKIT DALAM",
+"POLIKLINIK REHABILITASI MEDIK","POLIKLINIK THT","POLIKLINIK UROLOGI","RADIOLOGI",
+"RUANG ELANG LT.3","RUANG ENGGANG LT.2","RUANG ENGGANG LT.3","RUANG GIZI","RUANG HEMODIALISA",
+"RUANG ICCU 1","RUANG ICCU RAJAWALI","RUANG INSTALASI BEDAH SENTRAL","RUANG INTERMEDIATE",
+"RUANG KEMOTERAPI","RUANG MATERNITAS","RUANG NICU DAN PICU","RUANG PAVILIUN",
+"RUANG PERINATALOGI","RUANG PUNAI LT.3","RUANG TIUNG","UNIT PENCAMPURAN SEDIAAN STERIL (UPSS)",
+"UNIT GAWAT DARURAT","VIP DAN VVIP ENGGANG DAN PUNAI"
+];
+
+const MONTHS = [
+  {n:"Jan", full:"Januari"}, {n:"Feb", full:"Februari"}, {n:"Mar", full:"Maret"},
+  {n:"Apr", full:"April"}, {n:"Mei", full:"Mei"}, {n:"Jun", full:"Juni"},
+  {n:"Jul", full:"Juli"}, {n:"Agu", full:"Agustus"}, {n:"Sep", full:"September"},
+  {n:"Okt", full:"Oktober"}, {n:"Nov", full:"November"}, {n:"Des", full:"Desember"}
+];
+
+const TODAY = new Date();
+const CUR_YEAR = TODAY.getFullYear();
+const CUR_MONTH = TODAY.getMonth(); // 0-indexed
+
+let selectedYear = CUR_YEAR;
+let yearData = {}; // { roomName: { 0: "24 Jul 2026", ... } }
+let searchTerm = "";
+let saveQueue = Promise.resolve();
+
+function slugRoom(name){
+  return name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+}
+
+function storageKey(year){ return `opname:${year}`; }
+
+function formatDateShort(d){
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mmNames = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+  return `${dd} ${mmNames[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+async function loadYear(year){
+  try{
+    const res = await window.storage.get(storageKey(year), true);
+    yearData = res && res.value ? JSON.parse(res.value) : {};
+  }catch(e){
+    yearData = {};
+  }
+}
+
+async function saveYear(year){
+  saveQueue = saveQueue.then(async () => {
+    try{
+      await window.storage.set(storageKey(year), JSON.stringify(yearData), true);
+      showToast();
+    }catch(e){
+      console.error('Gagal menyimpan', e);
+    }
+  });
+  return saveQueue;
+}
+
+function showToast(){
+  const t = document.getElementById('saveToast');
+  t.textContent = `tersimpan · ${formatDateShort(new Date())}`;
+  t.classList.add('show');
+  clearTimeout(showToast._h);
+  showToast._h = setTimeout(()=>t.classList.remove('show'), 1600);
+}
+
+function buildYearOptions(){
+  const sel = document.getElementById('yearSelect');
+  sel.innerHTML = '';
+  for(let y = CUR_YEAR - 2; y <= CUR_YEAR + 1; y++){
+    const opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = y;
+    if(y === CUR_YEAR) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+function buildHeader(){
+  const headerRow = document.getElementById('headerRow');
+  headerRow.innerHTML = '<th class="th-room">Gudang / Unit</th>';
+  MONTHS.forEach((m, idx) => {
+    const th = document.createElement('th');
+    th.className = 'th-month' + (idx === CUR_MONTH && selectedYear === CUR_YEAR ? ' current-month' : '');
+    th.innerHTML = `${m.n}<span class="mon-full">${String(idx+1).padStart(2,'0')}</span>`;
+    th.title = m.full;
+    headerRow.appendChild(th);
+  });
+}
+
+function isFuture(year, monthIdx){
+  if(year > CUR_YEAR) return true;
+  if(year === CUR_YEAR && monthIdx > CUR_MONTH) return true;
+  return false;
+}
+
+function buildBody(){
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  const filtered = ROOMS
+    .map((name, i) => ({name, i}))
+    .filter(r => r.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  document.getElementById('noResults').style.display = filtered.length ? 'none' : 'block';
+
+  filtered.forEach(({name, i}) => {
+    const tr = document.createElement('tr');
+    const roomRecord = yearData[name] || {};
+
+    const tdRoom = document.createElement('td');
+    tdRoom.className = 'td-room';
+    tdRoom.innerHTML = `<span class="room-idx">${String(i+1).padStart(2,'0')}</span>${name}`;
+    tr.appendChild(tdRoom);
+
+    MONTHS.forEach((m, monthIdx) => {
+      const td = document.createElement('td');
+      td.className = 'td-cell';
+      const future = isFuture(selectedYear, monthIdx);
+      if(future) td.classList.add('is-future');
+
+      const checkedDate = roomRecord[monthIdx];
+      const btn = document.createElement('button');
+      btn.className = 'cell-btn' + (checkedDate ? ' checked' : '');
+      btn.type = 'button';
+      btn.disabled = future;
+      btn.setAttribute('aria-label', `${name} — ${m.full} ${selectedYear}`);
+      btn.innerHTML = `
+        <span class="checkbox-face">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </span>
+        <span class="cell-date">${checkedDate ? checkedDate : ''}</span>
+      `;
+      btn.addEventListener('click', () => toggleCell(name, monthIdx, btn));
+      td.appendChild(btn);
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+}
+
+async function toggleCell(roomName, monthIdx, btn){
+  if(!yearData[roomName]) yearData[roomName] = {};
+  const isChecked = !!yearData[roomName][monthIdx];
+
+  if(isChecked){
+    delete yearData[roomName][monthIdx];
+    btn.classList.remove('checked');
+    btn.querySelector('.cell-date').textContent = '';
+  } else {
+    const dateStr = formatDateShort(new Date());
+    yearData[roomName][monthIdx] = dateStr;
+    btn.classList.add('checked');
+    btn.querySelector('.cell-date').textContent = dateStr;
+  }
+
+  updateStats();
+  await saveYear(selectedYear);
+}
+
+function updateStats(){
+  const totalUnits = ROOMS.length;
+  const totalCells = totalUnits * 12;
+  let completed = 0;
+  let completedThisMonth = 0;
+
+  ROOMS.forEach(name => {
+    const rec = yearData[name] || {};
+    Object.keys(rec).forEach(mIdx => {
+      completed++;
+      if(parseInt(mIdx,10) === CUR_MONTH && selectedYear === CUR_YEAR) completedThisMonth++;
+    });
+  });
+
+  document.getElementById('statTotalUnits').textContent = totalUnits;
+  document.getElementById('statCompleted').textContent = completed;
+  document.getElementById('statPercent').textContent = Math.round((completed / totalCells) * 100) + '%';
+
+  const monthPercent = selectedYear === CUR_YEAR
+    ? Math.round((completedThisMonth / totalUnits) * 100) + '%'
+    : '—';
+  document.getElementById('statMonth').textContent = monthPercent;
+}
+
+async function switchYear(year){
+  selectedYear = parseInt(year, 10);
+  await loadYear(selectedYear);
+  buildHeader();
+  buildBody();
+  updateStats();
+}
+
+document.getElementById('yearSelect').addEventListener('change', (e) => switchYear(e.target.value));
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  searchTerm = e.target.value;
+  buildBody();
+});
+
+(async function init(){
+  buildYearOptions();
+  await switchYear(CUR_YEAR);
+})();
+</script>
+
+</body>
+</html>
