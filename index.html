@@ -63,14 +63,9 @@
 
   /* ---------- Header ---------- */
   header{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-end;
-    gap:24px;
-    flex-wrap:wrap;
-    padding-bottom:22px;
+    padding-bottom:18px;
     border-bottom: 1px solid var(--sage-300);
-    margin-bottom:22px;
+    margin-bottom:18px;
   }
   .brand-eyebrow{
     font-family:var(--font-mono);
@@ -102,6 +97,16 @@
     align-items:center;
     gap:10px;
     flex-wrap:wrap;
+  }
+  .toolbar{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:20px;
+    flex-wrap:wrap;
+    padding-bottom:20px;
+    margin-bottom:2px;
+    border-bottom: 1px solid var(--sage-300);
   }
   .field{
     display:flex;
@@ -461,6 +466,9 @@
       <h1>Ceklist <em>Stok Opname</em> Obat</h1>
       <p class="subtitle">Pemantauan pelaksanaan stok opname bulanan di seluruh gudang &amp; unit farmasi. Klik kotak untuk menandai selesai — tanggal tersimpan otomatis.</p>
     </div>
+  </header>
+
+  <div class="toolbar">
     <div class="controls">
       <div class="field">
         <label for="yearSelect">Tahun</label>
@@ -470,6 +478,8 @@
         <label for="searchInput">Cari Unit / Gudang</label>
         <input type="text" id="searchInput" placeholder="mis. IGD, poliklinik...">
       </div>
+    </div>
+    <div class="controls">
       <div class="field">
         <label for="newRoomInput">Tambah Gudang / Unit</label>
         <div style="display:flex;gap:6px;">
@@ -478,7 +488,7 @@
         </div>
       </div>
     </div>
-  </header>
+  </div>
 
   <div class="stats" id="statsRow">
     <div class="stat">
