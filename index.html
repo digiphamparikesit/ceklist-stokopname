@@ -40,6 +40,27 @@
 
   .wrap{max-width:1320px;margin:0 auto;}
 
+  /* ---------- Sticky top zone (header + controls + stats) ---------- */
+  .sticky-top{
+    position:sticky;
+    top:0;
+    z-index:20;
+    background: var(--sage-100);
+    padding-top:28px;
+    margin: -28px -20px 0;
+    padding-left:20px;
+    padding-right:20px;
+    box-shadow: 0 12px 18px -14px rgba(30,42,31,.35);
+  }
+  @media (min-width:1360px){
+    .sticky-top{
+      margin-left: calc((100% - 1320px)/-2 - 20px);
+      margin-right: calc((100% - 1320px)/-2 - 20px);
+      padding-left: calc((100% - 1320px)/2 + 20px);
+      padding-right: calc((100% - 1320px)/2 + 20px);
+    }
+  }
+
   /* ---------- Header ---------- */
   header{
     display:flex;
@@ -153,7 +174,8 @@
     box-shadow:0 1px 2px rgba(41,52,40,.04), 0 8px 24px -12px rgba(41,52,40,.12);
   }
   .table-scroll{
-    overflow-x:auto;
+    overflow:auto;
+    max-height: 62vh;
   }
   table{
     border-collapse:collapse;
@@ -165,7 +187,7 @@
     top:0;
     background:var(--sage-900);
     color:var(--sage-100);
-    z-index:3;
+    z-index:5;
     font-weight:600;
   }
   th, td{
@@ -184,7 +206,7 @@
     text-transform:uppercase;
     position:sticky;
     left:0;
-    z-index:4;
+    z-index:6;
     background:var(--sage-900);
     min-width:280px;
     max-width:280px;
@@ -388,6 +410,7 @@
 
 <div class="wrap">
 
+<div class="sticky-top">
   <header>
     <div>
       <p class="brand-eyebrow">RSUD AM Parikesit &middot; Instalasi Farmasi</p>
@@ -424,6 +447,7 @@
       <div class="label">Kelengkapan Bulan Ini</div>
     </div>
   </div>
+</div>
 
   <div class="table-shell">
     <div class="table-scroll">
