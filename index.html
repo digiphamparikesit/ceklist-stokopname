@@ -133,6 +133,50 @@
   select{min-width:110px; cursor:pointer;}
   input[type="text"]{min-width:220px;}
 
+  .add-room-btn{
+    font-family:var(--font-body);
+    font-size:13.5px;
+    font-weight:600;
+    padding:9px 16px;
+    border-radius:8px;
+    border:1px solid var(--clay);
+    background:var(--clay);
+    color:#fff;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .add-room-btn:hover{background:var(--clay-dark);}
+  .add-room-btn:active{transform:scale(.97);}
+
+  .remove-room-btn{
+    background:transparent;
+    border:none;
+    color:var(--sage-500);
+    cursor:pointer;
+    font-size:14px;
+    line-height:1;
+    padding:2px 4px;
+    border-radius:4px;
+    margin-left:6px;
+    vertical-align:middle;
+    transition:color .15s ease, background .15s ease;
+  }
+  .remove-room-btn:hover{color:var(--clay);background:var(--sage-200);}
+
+  .custom-tag{
+    font-family:var(--font-mono);
+    font-size:8px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--clay);
+    background:#f6e6dd;
+    border-radius:4px;
+    padding:1px 5px;
+    margin-left:7px;
+    vertical-align:middle;
+  }
+
   /* ---------- Stat strip ---------- */
   .stats{
     display:grid;
@@ -426,6 +470,13 @@
         <label for="searchInput">Cari Unit / Gudang</label>
         <input type="text" id="searchInput" placeholder="mis. IGD, poliklinik...">
       </div>
+      <div class="field">
+        <label for="newRoomInput">Tambah Gudang / Unit</label>
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="newRoomInput" placeholder="Nama gudang baru..." style="min-width:200px;">
+          <button id="addRoomBtn" type="button" class="add-room-btn">+ Tambah</button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -477,7 +528,7 @@
 <div class="save-toast" id="saveToast">tersimpan</div>
 
 <script>
-const ROOMS = [
+const BASE_ROOMS = [
 "ADMISI INSTALASI GAWAT DARURAT","ADMISI RAWAT INAP","ADMISI RAWAT JALAN","BDRS","CSSD",
 "DEPO FARMASI CATHLAB","DEPO FARMASI CENDRAWASIH","DEPO FARMASI IBS","DEPO FARMASI IGD",
 "DEPO FARMASI RAWAT INAP","DEPO FARMASI TERPADU","GENERAL CHECK UP","GUDANG FARMASI","IPS RS",
@@ -492,6 +543,54 @@ const ROOMS = [
 "RUANG PERINATALOGI","RUANG PUNAI LT.3","RUANG TIUNG","UNIT PENCAMPURAN SEDIAAN STERIL (UPSS)",
 "UNIT GAWAT DARURAT","VIP DAN VVIP ENGGANG DAN PUNAI"
 ];
+
+const CUSTOM_ROOMS_KEY = "rooms:custom-list";
+let customRooms = [];
+
+function getAllRooms(){
+  return [...BASE_ROOMS, ...customRooms];
+}
+
+async function loadCustomRooms(){
+  try{
+    const res = await window.storage.get(CUSTOM_ROOMS_KEY, true);
+    customRooms = res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){
+    customRooms = [];
+  }
+}
+
+async function saveCustomRooms(){
+  try{
+    await window.storage.set(CUSTOM_ROOMS_KEY, JSON.stringify(customRooms), true);
+  }catch(e){
+    console.error('Gagal menyimpan daftar gudang baru', e);
+  }
+}
+
+async function addRoom(name){
+  const trimmed = name.trim();
+  if(!trimmed) return;
+  const exists = getAllRooms().some(r => r.toLowerCase() === trimmed.toUpperCase().toLowerCase());
+  if(exists){
+    alert('Nama gudang/unit ini sudah ada di daftar.');
+    return;
+  }
+  customRooms.push(trimmed.toUpperCase());
+  await saveCustomRooms();
+  buildBody();
+  updateStats();
+  showToast('gudang ditambahkan');
+}
+
+async function removeRoom(name){
+  if(!confirm(`Hapus "${name}" dari daftar? Data ceklis unit ini di semua tahun tidak akan otomatis terhapus.`)) return;
+  customRooms = customRooms.filter(r => r !== name);
+  await saveCustomRooms();
+  buildBody();
+  updateStats();
+  showToast('gudang dihapus');
+}
 
 const MONTHS = [
   {n:"Jan", full:"Januari"}, {n:"Feb", full:"Februari"}, {n:"Mar", full:"Maret"},
@@ -542,9 +641,9 @@ async function saveYear(year){
   return saveQueue;
 }
 
-function showToast(){
+function showToast(msg){
   const t = document.getElementById('saveToast');
-  t.textContent = `tersimpan · ${formatDateShort(new Date())}`;
+  t.textContent = msg ? msg : `tersimpan · ${formatDateShort(new Date())}`;
   t.classList.add('show');
   clearTimeout(showToast._h);
   showToast._h = setTimeout(()=>t.classList.remove('show'), 1600);
@@ -553,7 +652,7 @@ function showToast(){
 function buildYearOptions(){
   const sel = document.getElementById('yearSelect');
   sel.innerHTML = '';
-  for(let y = CUR_YEAR - 2; y <= CUR_YEAR + 1; y++){
+  for(let y = 2026; y <= 2030; y++){
     const opt = document.createElement('option');
     opt.value = y;
     opt.textContent = y;
@@ -583,7 +682,8 @@ function isFuture(year, monthIdx){
 function buildBody(){
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = '';
-  const filtered = ROOMS
+  const allRooms = getAllRooms();
+  const filtered = allRooms
     .map((name, i) => ({name, i}))
     .filter(r => r.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -592,10 +692,20 @@ function buildBody(){
   filtered.forEach(({name, i}) => {
     const tr = document.createElement('tr');
     const roomRecord = yearData[name] || {};
+    const isCustom = customRooms.includes(name);
 
     const tdRoom = document.createElement('td');
     tdRoom.className = 'td-room';
-    tdRoom.innerHTML = `<span class="room-idx">${String(i+1).padStart(2,'0')}</span>${name}`;
+    tdRoom.innerHTML = `<span class="room-idx">${String(i+1).padStart(2,'0')}</span>${name}${isCustom ? '<span class="custom-tag">baru</span>' : ''}`;
+    if(isCustom){
+      const rmBtn = document.createElement('button');
+      rmBtn.className = 'remove-room-btn';
+      rmBtn.type = 'button';
+      rmBtn.innerHTML = '✕';
+      rmBtn.title = 'Hapus gudang ini';
+      rmBtn.addEventListener('click', (e) => { e.stopPropagation(); removeRoom(name); });
+      tdRoom.appendChild(rmBtn);
+    }
     tr.appendChild(tdRoom);
 
     MONTHS.forEach((m, monthIdx) => {
@@ -645,12 +755,13 @@ async function toggleCell(roomName, monthIdx, btn){
 }
 
 function updateStats(){
-  const totalUnits = ROOMS.length;
+  const allRooms = getAllRooms();
+  const totalUnits = allRooms.length;
   const totalCells = totalUnits * 12;
   let completed = 0;
   let completedThisMonth = 0;
 
-  ROOMS.forEach(name => {
+  allRooms.forEach(name => {
     const rec = yearData[name] || {};
     Object.keys(rec).forEach(mIdx => {
       completed++;
@@ -682,8 +793,24 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
   buildBody();
 });
 
+const newRoomInput = document.getElementById('newRoomInput');
+const addRoomBtn = document.getElementById('addRoomBtn');
+
+addRoomBtn.addEventListener('click', async () => {
+  await addRoom(newRoomInput.value);
+  newRoomInput.value = '';
+  newRoomInput.focus();
+});
+newRoomInput.addEventListener('keydown', async (e) => {
+  if(e.key === 'Enter'){
+    await addRoom(newRoomInput.value);
+    newRoomInput.value = '';
+  }
+});
+
 (async function init(){
   buildYearOptions();
+  await loadCustomRooms();
   await switchYear(CUR_YEAR);
 })();
 </script>
